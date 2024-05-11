@@ -11,6 +11,7 @@ app.use(
   cors({
     origin: ["http://localhost:5173"],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   })
 );
 app.use(express.json());
@@ -50,6 +51,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const volunteer = await volunteerCollection.findOne(query);
+      res.send(volunteer);
+    });
+
+    app.get("/volunteers/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const volunteer = await volunteerCollection.find(query).toArray();
       res.send(volunteer);
     });
 
