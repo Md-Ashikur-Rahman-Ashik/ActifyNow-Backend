@@ -41,6 +41,8 @@ async function run() {
 
     const volunteerCollection = client.db("actifyNow").collection("volunteer");
 
+    const requestCollection = client.db("actifyNow").collection("request");
+
     app.get("/needVolunteer", async (req, res) => {
       const cursor = volunteerCollection.find();
       const result = await cursor.toArray();
@@ -76,6 +78,15 @@ async function run() {
       res.send(result);
     });
 
+    // Post request to new collection
+    app.post("/newVolunteer", async (req, res) => {
+      const volunteer = req.body;
+      const result = await requestCollection.insertOne(volunteer);
+      res.send(result);
+    });
+
+    // Decrease request to old collection
+
     app.put("/volunteer/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -97,6 +108,13 @@ async function run() {
         volunteer,
         options
       );
+      res.send(result);
+    });
+
+    app.delete("/volunteer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await volunteerCollection.deleteOne(query);
       res.send(result);
     });
 
