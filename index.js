@@ -76,6 +76,30 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/volunteer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedVolunteer = req.body;
+      const volunteer = {
+        $set: {
+          thumbnail: updatedVolunteer.thumbnail,
+          postTitle: updatedVolunteer.postTitle,
+          description: updatedVolunteer.description,
+          categoryBox: updatedVolunteer.categoryBox,
+          location: updatedVolunteer.location,
+          numberOfVolunteers: updatedVolunteer.numberOfVolunteers,
+          date: updatedVolunteer.date,
+        },
+      };
+      const result = await volunteerCollection.updateOne(
+        query,
+        volunteer,
+        options
+      );
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log(
