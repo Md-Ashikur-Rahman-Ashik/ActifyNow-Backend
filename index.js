@@ -54,9 +54,18 @@ async function run() {
       res.send(volunteer);
     });
 
-    app.get("/volunteers/:email", async (req, res) => {
-      const email = req.params.email;
-      const query = { organizerEmail: email };
+    app.get("/volunteers", async (req, res) => {
+      // console.log(req.query.organizerEmail);
+      // console.log(req.body);
+      // if (req.query.organizerEmail !== req?.user?.organizerEmail) {
+      //   return res.status(403).send({ message: "Forbidden Access" });
+      // }
+
+      let query = {};
+      if (req.query?.organizerEmail) {
+        query = { organizerEmail: req.query.organizerEmail };
+      }
+
       const volunteer = await volunteerCollection.find(query).toArray();
       res.send(volunteer);
     });
