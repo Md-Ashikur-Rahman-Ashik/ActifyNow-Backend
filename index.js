@@ -86,6 +86,21 @@ async function run() {
     });
 
     // Decrease request to old collection
+    app.put("/newVolunteer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const result = await volunteerCollection.updateOne(
+        query,
+        {
+          $inc: {
+            numberOfVolunteers: -1,
+          },
+        },
+        options
+      );
+      res.send(result);
+    });
 
     app.put("/volunteer/:id", async (req, res) => {
       const id = req.params.id;
