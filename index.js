@@ -83,6 +83,23 @@ async function run() {
       res.send(result);
     });
 
+    // Generate JWT token
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.cookie("Token", token, cookieOptions).send({ success: true });
+    });
+
+    // API for logout user
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      res
+        .clearCookie("Token", { ...cookieOptions, maxAge: 0 })
+        .send({ success: true });
+    });
+
     app.post("/volunteers", async (req, res) => {
       const volunteer = req.body;
       const result = await volunteerCollection.insertOne(volunteer);
