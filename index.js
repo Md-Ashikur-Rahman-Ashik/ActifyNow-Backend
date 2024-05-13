@@ -72,6 +72,17 @@ async function run() {
       res.send(volunteer);
     });
 
+    // Be a volunteer request data
+    app.get("/newVolunteer", async (req, res) => {
+      let query = {};
+      if (req.query?.volunteerEmail) {
+        query = { volunteerEmail: req.query.volunteerEmail };
+      }
+      // const cursor = requestCollection.find();
+      const result = await requestCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/volunteers", async (req, res) => {
       const volunteer = req.body;
       const result = await volunteerCollection.insertOne(volunteer);
@@ -130,6 +141,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await volunteerCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // Delete data from new collection
+    app.delete("/newVolunteer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await requestCollection.deleteOne(query);
       res.send(result);
     });
 
