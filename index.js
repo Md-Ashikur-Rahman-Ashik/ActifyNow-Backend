@@ -62,7 +62,7 @@ async function run() {
 
     const requestCollection = client.db("actifyNow").collection("request");
 
-    app.get("/needVolunteer", verifyToken, async (req, res) => {
+    app.get("/needVolunteer", async (req, res) => {
       const cursor = volunteerCollection.find();
       const result = await cursor.toArray();
       res.send(result);
