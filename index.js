@@ -34,6 +34,25 @@ const cookieOptions = {
   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 };
 
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.Token;
+  // console.log("Token in the middleware", token);
+
+  // No token provided
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "Unauthorized Access" });
+    }
+    req.user = decoded;
+    next();
+  });
+  // next();
+};
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -43,25 +62,25 @@ async function run() {
 
     const requestCollection = client.db("actifyNow").collection("request");
 
-    app.get("/needVolunteer", async (req, res) => {
+    app.get("/needVolunteer", verifyToken, async (req, res) => {
       const cursor = volunteerCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
-    app.get("/volunteer/:id", async (req, res) => {
+    app.get("/volunteer/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const volunteer = await volunteerCollection.findOne(query);
       res.send(volunteer);
     });
 
-    app.get("/volunteers", async (req, res) => {
+    app.get("/volunteers", verifyToken, async (req, res) => {
       // console.log(req.query.organizerEmail);
       // console.log(req.body);
-      // if (req.query.organizerEmail !== req?.user?.organizerEmail) {
-      //   return res.status(403).send({ message: "Forbidden Access" });
-      // }
+      if (req.user.email !== req.query.organizerEmail) {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
 
       let query = {};
       if (req.query?.organizerEmail) {
@@ -73,7 +92,11 @@ async function run() {
     });
 
     // Be a volunteer request data
-    app.get("/newVolunteer", async (req, res) => {
+    app.get("/newVolunteer", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.volunteerEmail) {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+
       let query = {};
       if (req.query?.volunteerEmail) {
         query = { volunteerEmail: req.query.volunteerEmail };
@@ -100,7 +123,7 @@ async function run() {
         .send({ success: true });
     });
 
-    app.post("/volunteers", async (req, res) => {
+    app.post("/volunteers", verifyToken, async (req, res) => {
       const volunteer = req.body;
       const result = await volunteerCollection.insertOne(volunteer);
       res.send(result);
